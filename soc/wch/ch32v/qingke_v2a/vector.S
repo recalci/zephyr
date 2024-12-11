@@ -15,7 +15,7 @@ GTEXT(__initialize)
 SECTION_FUNC(vectors, ivt)
 	.option norvc
 	j       __start
-	.rept 38
+	.rept   38
 	.word	_isr_wrapper
 	.endr
 
