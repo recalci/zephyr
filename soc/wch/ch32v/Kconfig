@@ -10,6 +10,13 @@ config SOC_FAMILY_CH32V
 
 if SOC_FAMILY_CH32V
 
+config VECTOR_TABLE_SIZE
+	int "Number of Interrupt and Exception Vectors"
+	range 20 256
+	help
+		This option defines the total number of interrupt and exception
+		vectors in the vector table.
+
 rsource "*/Kconfig"
 
 endif # SOC_FAMILY_CH32V
