@@ -7,7 +7,7 @@
 #ifndef _CH32FUN_H
 #define _CH32FUN_H
 
-#if defined(CONFIG_SOC_CH32V003)
+#if defined(CONFIG_SOC_SERIES_QINGKE_V2A)
 #define CH32V003 1
 #include <ch32v003fun.h>
 #endif

@@ -1,0 +1,11 @@
+/*
+ * Copyright (c) 2024 Jianxiong Gu <jianxiong.gu@outlook.com>
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+#include <wch/ch64/ch641.dtsi>
+
+&gpiob {
+	gpio-reserved-ranges = <6 1>, <10 6>;
+};
