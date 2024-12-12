@@ -9,6 +9,11 @@
 
 #if defined(CONFIG_SOC_CH32V003)
 #define CH32V003 1
+#elif defined(CONFIG_SOC_CH641)
+#define CH641 1
+#endif
+
+#if defined(CONFIG_SOC_SERIES_QINGKE_V2A)
 #include <ch32v003fun.h>
 #endif
 

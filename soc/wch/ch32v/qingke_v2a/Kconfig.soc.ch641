@@ -1,0 +1,9 @@
+# Copyright (c) 2024 Jianxiong Gu <jianxiong.gu@outlook.com>
+# SPDX-License-Identifier: Apache-2.0
+
+config SOC_CH641
+	bool
+	select SOC_SERIES_QINGKE_V2A
+
+config SOC
+	default "ch641" if SOC_CH641

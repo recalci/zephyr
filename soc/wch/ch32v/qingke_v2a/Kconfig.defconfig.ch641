@@ -1,0 +1,12 @@
+# Copyright (c) 2024 Jianxiong Gu <jianxiong.gu@outlook.com>
+# SPDX-License-Identifier: Apache-2.0
+
+if SOC_CH641
+
+config VECTOR_TABLE_SIZE
+	default 40
+
+config NUM_IRQS
+	default 59
+
+endif # SOC_CH641

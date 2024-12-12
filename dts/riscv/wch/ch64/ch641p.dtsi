@@ -1,0 +1,21 @@
+/*
+ * Copyright (c) 2024 Jianxiong Gu <jianxiong.gu@outlook.com>
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+#include <wch/ch64/ch641.dtsi>
+
+/ {
+	soc {
+		pinctrl: pin-controller@40010000 {
+			gpioa: gpio@40010800 {
+				gpio-reserved-ranges = <3 1>, <5 1>, <8 8>;
+			};
+
+			gpiob: gpio@40010c00 {
+				gpio-reserved-ranges = <2 1>, <5 2>, <10 6>;
+			};
+		};
+	};
+};
