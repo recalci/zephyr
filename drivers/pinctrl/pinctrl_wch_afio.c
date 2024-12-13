@@ -5,14 +5,22 @@
  */
 
 #include <zephyr/drivers/pinctrl.h>
+#if defined(CONFIG_SOC_CH32V003)
 #include <zephyr/dt-bindings/pinctrl/ch32v003-pinctrl.h>
-
+#elif defined(CONFIG_SOC_CH641)
+#include <zephyr/dt-bindings/pinctrl/ch641-pinctrl.h>
+#endif
 #include <ch32fun.h>
 
 static GPIO_TypeDef *const wch_afio_pinctrl_regs[] = {
+#if defined(CONFIG_SOC_CH32V003)
 	(GPIO_TypeDef *)DT_REG_ADDR(DT_NODELABEL(gpioa)),
 	(GPIO_TypeDef *)DT_REG_ADDR(DT_NODELABEL(gpioc)),
 	(GPIO_TypeDef *)DT_REG_ADDR(DT_NODELABEL(gpiod)),
+#elif defined(CONFIG_SOC_CH641)
+	(GPIO_TypeDef *)DT_REG_ADDR(DT_NODELABEL(gpioa)),
+	(GPIO_TypeDef *)DT_REG_ADDR(DT_NODELABEL(gpiob)),
+#endif
 };
 
 int pinctrl_configure_pins(const pinctrl_soc_pin_t *pins, uint8_t pin_cnt, uintptr_t reg)
@@ -20,10 +28,17 @@ int pinctrl_configure_pins(const pinctrl_soc_pin_t *pins, uint8_t pin_cnt, uintp
 	int i;
 
 	for (i = 0; i < pin_cnt; i++, pins++) {
+#if defined(CONFIG_SOC_CH32V003)
 		uint8_t port = (pins->config >> CH32V003_PINCTRL_PORT_SHIFT) & 0x03;
 		uint8_t pin = (pins->config >> CH32V003_PINCTRL_PIN_SHIFT) & 0x0F;
 		uint8_t bit0 = (pins->config >> CH32V003_PINCTRL_RM_BASE_SHIFT) & 0x1F;
 		uint8_t remap = (pins->config >> CH32V003_PINCTRL_RM_SHIFT) & 0x3;
+#elif defined(CONFIG_SOC_CH641)
+		uint8_t port = (pins->config >> CH641_PINCTRL_PORT_SHIFT) & 0x01;
+		uint8_t pin = (pins->config >> CH641_PINCTRL_PIN_SHIFT) & 0x0F;
+		uint8_t bit0 = (pins->config >> CH641_PINCTRL_RM_BASE_SHIFT) & 0x1F;
+		uint8_t remap = (pins->config >> CH641_PINCTRL_RM_SHIFT) & 0x7;
+#endif
 		GPIO_TypeDef *regs = wch_afio_pinctrl_regs[port];
 		uint32_t pcfr1 = AFIO->PCFR1;
 		uint8_t cfg = 0;
@@ -34,9 +49,11 @@ int pinctrl_configure_pins(const pinctrl_soc_pin_t *pins, uint8_t pin_cnt, uintp
 
 		if (pins->output_high || pins->output_low) {
 			cfg |= (pins->slew_rate + 1);
+#ifndef CONFIG_SOC_CH641
 			if (pins->drive_open_drain) {
 				cfg |= BIT(2);
 			}
+#endif
 			/* Select the alternate function */
 			cfg |= BIT(3);
 		} else {
@@ -63,6 +80,7 @@ int pinctrl_configure_pins(const pinctrl_soc_pin_t *pins, uint8_t pin_cnt, uintp
 			}
 		}
 
+#if defined(CONFIG_SOC_CH32V003)
 		if (bit0 == CH32V003_PINMUX_I2C1_RM) {
 			pcfr1 |= ((remap & 1) << CH32V003_PINMUX_I2C1_RM) |
 				 (((remap >> 1) & 1) << CH32V003_PINMUX_I2C1_RM1);
@@ -72,6 +90,10 @@ int pinctrl_configure_pins(const pinctrl_soc_pin_t *pins, uint8_t pin_cnt, uintp
 		} else {
 			pcfr1 |= remap << bit0;
 		}
+#elif defined(CONFIG_SOC_CH641)
+		pcfr1 |= remap << bit0;
+#endif
+
 		AFIO->PCFR1 = pcfr1;
 	}
 

@@ -21,8 +21,34 @@ struct ch32v003_pinctrl_soc_pin {
 	uint8_t slew_rate: 2;
 };
 
-typedef struct ch32v003_pinctrl_soc_pin pinctrl_soc_pin_t;
+struct ch641_pinctrl_soc_pin {
+	uint32_t config: 14;
+	bool bias_pull_up: 1;
+	bool bias_pull_down: 1;
+	bool drive_push_pull: 1;
+	bool output_high: 1;
+	bool output_low: 1;
+	uint8_t slew_rate: 2;
+};
 
+#if defined(CONFIG_SOC_CH32V003)
+typedef struct ch32v003_pinctrl_soc_pin pinctrl_soc_pin_t;
+#elif defined(CONFIG_SOC_CH641)
+typedef struct ch641_pinctrl_soc_pin pinctrl_soc_pin_t;
+#endif
+
+#if defined(CONFIG_SOC_CH641)
+#define Z_PINCTRL_STATE_PIN_INIT(node_id, prop, idx)                                               \
+	{                                                                                          \
+		.config = DT_PROP_BY_IDX(node_id, prop, idx),                                      \
+		.bias_pull_up = DT_PROP(node_id, bias_pull_up),                                    \
+		.bias_pull_down = DT_PROP(node_id, bias_pull_down),                                \
+		.drive_push_pull = DT_PROP(node_id, drive_push_pull),                              \
+		.output_high = DT_PROP(node_id, output_high),                                      \
+		.output_low = DT_PROP(node_id, output_low),                                        \
+		.slew_rate = DT_ENUM_IDX(node_id, slew_rate),                                      \
+	},
+#else
 #define Z_PINCTRL_STATE_PIN_INIT(node_id, prop, idx)                                               \
 	{                                                                                          \
 		.config = DT_PROP_BY_IDX(node_id, prop, idx),                                      \
@@ -34,6 +60,7 @@ typedef struct ch32v003_pinctrl_soc_pin pinctrl_soc_pin_t;
 		.output_low = DT_PROP(node_id, output_low),                                        \
 		.slew_rate = DT_ENUM_IDX(node_id, slew_rate),                                      \
 	},
+#endif
 
 #define Z_PINCTRL_STATE_PINS_INIT(node_id, prop)                                                   \
 	{DT_FOREACH_CHILD_VARGS(DT_PHANDLE(node_id, prop), DT_FOREACH_PROP_ELEM, pinmux,           \
