@@ -1,0 +1,54 @@
+/*
+ * Copyright (c) 2024 Jianxiong Gu <jianxiong.gu@outlook.com>
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/dts-v1/;
+
+#include <wch/ch64/ch641p.dtsi>
+
+/ {
+	model = "ch641evt";
+	compatible = "wch,ch641";
+
+	chosen {
+		zephyr,sram = &sram0;
+		zephyr,flash = &flash0;
+		zephyr,console = &usart1;
+		zephyr,shell-uart = &usart1;
+	};
+
+	leds {
+		compatible = "gpio-leds";
+		status = "okay";
+
+		red_led: led0 {
+			gpios = <&gpiob 1 GPIO_ACTIVE_LOW>;
+		};
+
+		blue_led: led1 {
+			gpios = <&gpioa 6 GPIO_ACTIVE_LOW>;
+		};
+	};
+
+	aliases {
+		led0 = &red_led;
+		led1 = &blue_led;
+	};
+};
+
+&pll {
+	clocks = <&clk_hsi>;
+	status = "okay";
+};
+
+&rcc {
+	clocks = <&pll>;
+};
+
+&usart1 {
+	status = "okay";
+	current-speed = <115200>;
+	pinctrl-0 = <&usart1_default>;
+	pinctrl-names = "default";
+};

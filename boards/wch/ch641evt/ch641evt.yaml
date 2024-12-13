@@ -1,0 +1,11 @@
+identifier: ch641evt
+name: WCH CH641 Evaluation Board
+type: mcu
+arch: riscv
+toolchain:
+  - cross-compile
+  - zephyr
+ram: 2
+flash: 16
+supported:
+  - gpio

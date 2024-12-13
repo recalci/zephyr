@@ -1,0 +1,5 @@
+# Copyright (c) 2024 Jianxiong Gu <jianxiong.gu@outlook.com>
+# SPDX-License-Identifier: Apache-2.0
+
+config BOARD_CH641EVT
+	select SOC_CH641
