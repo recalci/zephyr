@@ -24,8 +24,10 @@
 #if DT_SAME_NODE(DT_PLL_CLOCKS_CTRL, DT_NODELABEL(clk_hsi))
 #define WCH_RCC_PLL_SRC_IS_HSI 1
 #endif
+#ifndef CONFIG_SOC_CH641
 #if DT_SAME_NODE(DT_PLL_CLOCKS_CTRL, DT_NODELABEL(clk_hse))
 #define WCH_RCC_PLL_SRC_IS_HSE 1
+#endif
 #endif
 #endif
 
@@ -36,8 +38,10 @@
 #if DT_SAME_NODE(DT_RCC_CLOCKS_CTRL, DT_NODELABEL(clk_hsi))
 #define WCH_RCC_SRC_IS_HSI 1
 #endif
+#ifndef CONFIG_SOC_CH641
 #if DT_SAME_NODE(DT_RCC_CLOCKS_CTRL, DT_NODELABEL(clk_hse))
 #define WCH_RCC_SRC_IS_HSE 1
+#endif
 #endif
 
 struct clock_control_wch_rcc_config {
@@ -96,10 +100,12 @@ static int clock_control_wch_rcc_init(const struct device *dev)
 		RCC->CTLR &= ~RCC_PLLON;
 	}
 
+#ifndef CONFIG_SOC_CH641
 	/* Always enable the LSI. */
 	RCC->RSTSCKR |= RCC_LSION;
 	while ((RCC->RSTSCKR & RCC_LSIRDY) == 0) {
 	}
+#endif
 
 	if (IS_ENABLED(CONFIG_DT_HAS_WCH_CH32V00X_HSI_CLOCK_ENABLED)) {
 		RCC->CTLR |= RCC_HSION;
@@ -114,11 +120,13 @@ static int clock_control_wch_rcc_init(const struct device *dev)
 	}
 
 	if (IS_ENABLED(CONFIG_DT_HAS_WCH_CH32V00X_PLL_CLOCK_ENABLED)) {
+#ifndef CONFIG_SOC_CH641
 		if (IS_ENABLED(WCH_RCC_PLL_SRC_IS_HSE)) {
 			RCC->CFGR0 |= RCC_PLLSRC;
 		} else if (IS_ENABLED(WCH_RCC_PLL_SRC_IS_HSI)) {
 			RCC->CFGR0 &= ~RCC_PLLSRC;
 		}
+#endif
 		RCC->CTLR |= RCC_PLLON;
 		while ((RCC->CTLR & RCC_PLLRDY) == 0) {
 		}
@@ -131,7 +139,9 @@ static int clock_control_wch_rcc_init(const struct device *dev)
 	} else if (IS_ENABLED(WCH_RCC_SRC_IS_PLL)) {
 		RCC->CFGR0 = (RCC->CFGR0 & ~RCC_SW) | RCC_SW_PLL;
 	}
+#ifndef CONFIG_SOC_CH641
 	RCC->CTLR |= RCC_CSSON;
+#endif
 
 	/* Clear the interrupt flags. */
 	RCC->INTR = RCC_CSSC | RCC_PLLRDYC | RCC_HSERDYC | RCC_LSIRDYC;

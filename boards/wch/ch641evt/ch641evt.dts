@@ -6,6 +6,7 @@
 /dts-v1/;
 
 #include <wch/ch64/ch641p.dtsi>
+#include "ch641evt-pinctrl.dtsi"
 
 / {
 	model = "ch641evt";
