@@ -33,7 +33,7 @@ extern "C" {
  */
 
 /** BC1.2 USB charger voltage. */
-#define BC12_CHARGER_VOLTAGE_UV	 5000 * 1000
+#define BC12_CHARGER_VOLTAGE_UV  5000 * 1000
 /**
  * BC1.2 USB charger minimum current. Set to match the Isusp of 2.5 mA parameter.
  * This is returned by the driver when either BC1.2 detection fails, or the
