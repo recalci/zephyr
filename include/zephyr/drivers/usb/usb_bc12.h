@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2022 Google LLC
+ * Copyright (c) 2025 Jianxiong Gu
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -238,6 +239,46 @@ enum bc12_type {
 	BC12_TYPE_COUNT,
 };
 
+/** @brief BC1.2 DP state. */
+enum bc12_dp_state {
+	/** BC1.2 peripheral disconnect to D+ line. */
+	BC12_DP_OPEN,
+	/** turn on VDP_SRC */
+	BC12_DP_VDP_SRC,
+	/** turn on IDP_SRC */
+	BC12_DP_IDP_SRC,
+	/** turn on IDP_SINK */
+	BC12_DP_IDP_SINK,
+	/** turn on RDP_UP */
+	BC12_DP_RDP_UP,
+	/** turn on RDP_DWN */
+	BC12_DP_RDP_DWN,
+	/** short D+ to D- through a resistance of RDCP_DATA */
+	BC12_DP_SHORT_DM,
+};
+
+/** @brief BC1.2 DM state. */
+enum bc12_dm_state {
+	/** BC1.2 peripheral disconnect to D- line. */
+	BC12_DM_OPEN,
+	/** turn on VDM_SRC */
+	BC12_DM_VDM_SRC,
+	/** turn on IDM_SRC */
+	BC12_DM_IDM_SINK,
+	/** turn on IDM_SINK */
+	BC12_DM_RDM_DWN,
+	BC12_DM_SHORT_DP,
+};
+
+/** @brief BC1.2 DP DM voltage level. */
+enum bc12_dpdm_voltage_level {
+	/** Higher than VLGC (Min: 0.8V, Max: 2.0V) */
+	BC12_LOGIC_HIGH,
+	/** Higher than VDAT_REF (Min: 0.25V, Max: 0.4V) */
+	BC12_ABOVE_VDAT_REF,
+	BC12_BELOW_VDAT_REF,
+};
+
 /**
  * @brief BC1.2 detected partner state.
  *
@@ -285,6 +326,9 @@ typedef void (*bc12_callback_t)(const struct device *dev, struct bc12_partner_st
 __subsystem struct bc12_driver_api {
 	int (*set_role)(const struct device *dev, enum bc12_role role);
 	int (*set_result_cb)(const struct device *dev, bc12_callback_t cb, void *user_data);
+	int (*set_dpdm)(const struct device *dev, enum bc12_dp_state dp, enum bc12_dm_state dm);
+	int (*get_dpdm)(const struct device *dev, enum bc12_dpdm_voltage_level *dp,
+			enum bc12_dpdm_voltage_level *dm);
 };
 /**
  * @endcond
@@ -326,6 +370,55 @@ static inline int z_impl_bc12_set_result_cb(const struct device *dev, bc12_callb
 	const struct bc12_driver_api *api = (const struct bc12_driver_api *)dev->api;
 
 	return api->set_result_cb(dev, cb, user_data);
+}
+
+/**
+ * @brief Set the DP and DM state for BC1.2 detection.
+ *
+ * @param dev Pointer to the device structure for the BC1.2 driver instance.
+ * @param dp Current DP state.
+ * @param dm Current DM state.
+ *
+ * @retval 0 If successful.
+ * @retval -EIO General input/output error.
+ */
+__syscall int bc12_set_dpdm(const struct device *dev, enum bc12_dp_state dp, enum bc12_dm_state dm);
+
+static inline int z_impl_bc12_set_dpdm(const struct device *dev, enum bc12_dp_state dp,
+				       enum bc12_dm_state dm)
+{
+	const struct bc12_driver_api *api = (const struct bc12_driver_api *)dev->api;
+
+	if (api->set_dpdm == NULL) {
+		return -ENOSYS;
+	}
+
+	return api->set_dpdm(dev, dp, dm);
+}
+
+/**
+ * @brief Get the voltage level on DP and DM.
+ *
+ * @param dev Pointer to the device structure for the BC1.2 driver instance.
+ * @param dp Pointer where the DP voltage level is stored.
+ * @param dm Pointer where the DM voltage level is stored.
+ *
+ * @retval 0 If successful.
+ * @retval -EIO General input/output error.
+ */
+__syscall int bc12_get_dpdm(const struct device *dev, enum bc12_dpdm_voltage_level *dp,
+			    enum bc12_dpdm_voltage_level *dm);
+
+static inline int z_impl_bc12_get_dpdm(const struct device *dev, enum bc12_dpdm_voltage_level *dp,
+				       enum bc12_dpdm_voltage_level *dm)
+{
+	const struct bc12_driver_api *api = (const struct bc12_driver_api *)dev->api;
+
+	if (api->get_dpdm == NULL) {
+		return -ENOSYS;
+	}
+
+	return api->get_dpdm(dev, dp, dm);
 }
 
 #ifdef __cplusplus
