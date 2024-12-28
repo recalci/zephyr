@@ -22,8 +22,6 @@ struct pi3usb9201_config {
 	struct i2c_dt_spec i2c;
 
 	struct gpio_dt_spec intb_gpio;
-
-	enum bc12_type charging_mode;
 };
 
 /* Run-time configuration data */
@@ -140,8 +138,7 @@ static int pi3usb9201_get_mode(const struct device *dev, enum pi3usb9201_mode *c
 	return 0;
 }
 
-static int pi3usb9201_get_status(const struct device *dev, uint8_t *const client,
-				 uint8_t *const host)
+static int pi3usb9201_get_status(const struct device *dev, uint8_t *const client)
 {
 	const struct pi3usb9201_config *cfg = dev->config;
 	uint8_t status;
@@ -154,15 +151,6 @@ static int pi3usb9201_get_status(const struct device *dev, uint8_t *const client
 
 	if (client != NULL) {
 		*client = status;
-	}
-
-	rv = i2c_reg_read_byte_dt(&cfg->i2c, PI3USB9201_REG_HOST_STS, &status);
-	if (rv < 0) {
-		return rv;
-	}
-
-	if (host != NULL) {
-		*host = status;
 	}
 
 	return 0;
@@ -194,11 +182,6 @@ static bool pi3usb9201_partner_has_changed(const struct device *dev,
 
 	if (state->bc12_role == BC12_PORTABLE_DEVICE &&
 	    pi3usb9201_data->partner_state.type != state->type) {
-		return true;
-	}
-
-	if (state->bc12_role == BC12_CHARGING_PORT &&
-	    pi3usb9201_data->partner_state.pd_partner_connected != state->pd_partner_connected) {
 		return true;
 	}
 
@@ -300,55 +283,6 @@ static void pi3usb9201_client_detect_finish(const struct device *dev, const int 
 	pi3usb9201_update_charging_partner(dev, &new_partner_state);
 }
 
-static void pi3usb9201_host_interrupt(const struct device *dev, uint8_t host_status)
-{
-	const struct pi3usb9201_config *pi3usb9201_config = dev->config;
-	struct bc12_partner_state partner_state;
-
-	switch (pi3usb9201_config->charging_mode) {
-	case BC12_TYPE_NONE:
-		/*
-		 * For USB-C connections, enable the USB data path
-		 * TODO - Provide a devicetree property indicating
-		 * whether the USB data path is supported.
-		 */
-		pi3usb9201_set_mode(dev, PI3USB9201_USB_PATH_ON);
-		break;
-	case BC12_TYPE_CDP:
-		if (IS_ENABLED(CONFIG_USB_BC12_PI3USB9201_CDP_ERRATA)) {
-			/*
-			 * Switch to SDP after device is plugged in to avoid
-			 * noise (pulse on D-) causing USB disconnect
-			 */
-			if (host_status & PI3USB9201_REG_HOST_STS_DEV_PLUG) {
-				pi3usb9201_set_mode(dev, PI3USB9201_SDP_HOST_MODE);
-			}
-			/*
-			 * Switch to CDP after device is unplugged so we
-			 * advertise higher power available for next device.
-			 */
-			if (host_status & PI3USB9201_REG_HOST_STS_DEV_UNPLUG) {
-				pi3usb9201_set_mode(dev, PI3USB9201_CDP_HOST_MODE);
-			}
-		}
-		__fallthrough;
-	case BC12_TYPE_SDP:
-		/* Plug/unplug events only valid for CDP and SDP modes */
-		if (host_status & PI3USB9201_REG_HOST_STS_DEV_PLUG) {
-			partner_state.bc12_role = BC12_CHARGING_PORT;
-			partner_state.pd_partner_connected = true;
-			pi3usb9201_update_charging_partner(dev, &partner_state);
-		}
-		if (host_status & PI3USB9201_REG_HOST_STS_DEV_UNPLUG) {
-			partner_state.bc12_role = BC12_CHARGING_PORT;
-			partner_state.pd_partner_connected = false;
-			pi3usb9201_update_charging_partner(dev, &partner_state);
-		}
-		break;
-	default:
-		break;
-	}
-}
 
 static int pi3usb9201_disconnect(const struct device *dev)
 {
@@ -419,84 +353,16 @@ static int pi3usb9201_set_portable_device(const struct device *dev)
 	return 0;
 }
 
-static int pi3usb9201_set_charging_mode(const struct device *dev)
-{
-	const struct pi3usb9201_config *pi3usb9201_config = dev->config;
-	struct bc12_partner_state partner_state;
-	enum pi3usb9201_mode current_mode;
-	enum pi3usb9201_mode desired_mode;
-	int rv;
-
-	if (pi3usb9201_config->charging_mode == BC12_TYPE_NONE) {
-		/*
-		 * For USB-C connections, enable the USB data path when configured
-		 * as a downstream facing port but charging is disabled.
-		 *
-		 * TODO - Provide a devicetree property indicating
-		 * whether the USB data path is supported.
-		 */
-		return pi3usb9201_set_mode(dev, PI3USB9201_USB_PATH_ON);
-	}
-
-	/*
-	 * When enabling charging mode for this port, clear out information
-	 * regarding any charging partners.
-	 */
-	partner_state.bc12_role = BC12_CHARGING_PORT;
-	partner_state.pd_partner_connected = false;
-
-	pi3usb9201_update_charging_partner(dev, &partner_state);
-
-	rv = pi3usb9201_interrupt_enable(dev, false);
-	if (rv < 0) {
-		return rv;
-	}
-
-	rv = pi3usb9201_get_mode(dev, &current_mode);
-	if (rv < 0) {
-		return rv;
-	}
-
-	desired_mode = charging_mode_to_host_mode[pi3usb9201_config->charging_mode];
-
-	if (current_mode != desired_mode) {
-		LOG_DBG("Set host mode to %d", desired_mode);
-
-		/*
-		 * Read both status registers to ensure that all
-		 * interrupt indications are cleared prior to starting
-		 * charging port (host) mode.
-		 */
-		rv = pi3usb9201_get_status(dev, NULL, NULL);
-		if (rv < 0) {
-			return rv;
-		}
-
-		rv = pi3usb9201_set_mode(dev, desired_mode);
-		if (rv < 0) {
-			return rv;
-		}
-	}
-
-	rv = pi3usb9201_interrupt_enable(dev, true);
-	if (rv < 0) {
-		return rv;
-	}
-
-	return 0;
-}
-
 static void pi3usb9201_isr_work(struct k_work *item)
 {
 	struct pi3usb9201_data *pi3usb9201_data = CONTAINER_OF(item, struct pi3usb9201_data, work);
 	const struct device *dev = pi3usb9201_data->dev;
 	uint8_t client;
-	uint8_t host;
 	int rv;
 
-	rv = pi3usb9201_get_status(dev, &client, &host);
+	rv = pi3usb9201_get_status(dev, &client);
 	if (rv < 0) {
-		LOG_ERR("Failed to get host/client status");
+		LOG_ERR("Failed to get client status");
 		return;
 	}
 
@@ -506,10 +372,6 @@ static void pi3usb9201_isr_work(struct k_work *item)
 		 * BC1.2 detection has completed.
 		 */
 		pi3usb9201_client_detect_finish(dev, client);
-	}
-
-	if (host != 0) {
-		pi3usb9201_host_interrupt(dev, host);
 	}
 }
 
@@ -528,8 +390,6 @@ static int pi3usb9201_set_role(const struct device *dev, const enum bc12_role ro
 		return pi3usb9201_disconnect(dev);
 	case BC12_PORTABLE_DEVICE:
 		return pi3usb9201_set_portable_device(dev);
-	case BC12_CHARGING_PORT:
-		return pi3usb9201_set_charging_mode(dev);
 	default:
 		LOG_ERR("unsupported BC12 role: %d", role);
 		return -EINVAL;
@@ -612,7 +472,6 @@ static int pi3usb9201_init(const struct device *dev)
 	static const struct pi3usb9201_config pi3usb9201_config_##inst = {                         \
 		.i2c = I2C_DT_SPEC_INST_GET(inst),                                                 \
 		.intb_gpio = GPIO_DT_SPEC_INST_GET(inst, intb_gpios),                              \
-		.charging_mode = DT_INST_STRING_UPPER_TOKEN(inst, charging_mode),                  \
 	};                                                                                         \
                                                                                                    \
 	DEVICE_DT_INST_DEFINE(inst, pi3usb9201_init, NULL, &pi3usb9201_data_##inst,                \

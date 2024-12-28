@@ -1,0 +1,10 @@
+# Copyright (c) 2025 Jianxiong Gu
+# SPDX-License-Identifier: Apache-2.0
+
+config USB_BC12_CH32V
+	bool "CH32V USB BC1.2 driver"
+	depends on DT_HAS_WCH_CH32V_BC12_ENABLED
+	help
+	  Enable USB BC1.2 support on the WCH RISC-V Qingke Series of
+	  processors. It can operate in portable device mode. It starts
+	  BC1.2 detection to detect the attached host type.
