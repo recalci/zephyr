@@ -28,6 +28,158 @@ extern "C" {
 /* FIXME - make these Kconfig options */
 
 /**
+ * @brief Maximum value for DCP Shut Down Voltage.
+ *        A PD shall not pull the output voltage of a Charging Port below VDCP_SHTDWN max.
+ */
+#define BC12_V_DCP_SHTDWN_MAX_MV 2000
+
+/**
+ * @brief OTG Session Valid Voltage
+ *        Each PD shall detects when VBUS is greater than its internal session valid threshold.
+ */
+#define BC12_V_OTG_SESS_VLD_MAX_MV 4000
+#define BC12_V_OTG_SESS_VLD_MIN_MV  800
+
+/**
+ * @name BC1.2, Table 5-5 Times
+ * @{
+ */
+
+/**
+ * @brief Maximum time for IDP_SINK to be disabled after connect.
+ *        The CDP shall disable IDP_SINK within TCON_IDPSNK_DIS of detecting the connect.
+ */
+#define BC12_T_CON_IDPSNK_DIS_MAX_MS 10
+
+/**
+ * @brief Time for VDM_SRC to be disabled after connect.
+ *        This is the time a CDP waits to disable VDM_SRC after a connect.
+ */
+#define BC12_T_CP_VDM_DIS_MAX_MS 10
+
+/**
+ * @brief Time for VDM_SRC to be enabled after disconnect.
+ *        This is the time a CDP waits to enable VDM_SRC after a disconnect.
+ */
+#define BC12_T_CP_VDM_EN_MAX_MS 200
+
+/**
+ * @brief Time for VDP_SRC to be enabled after attach during Dead Battery Provision (DBP).
+ *        This is the time a PD waits to enable VDP_SRC after attach.
+ */
+#define BC12_T_DBP_ATT_VDPSRC_MAX_MS 1000
+
+/**
+ * @brief Time for a PD to reach full USB functionality under Dead Battery Provision (DBP).
+ *        This is the time a PD waits to provide full USB functionality after attach.
+ */
+#define BC12_T_DBP_FUL_FNCTN_MS 15 * 60 * 1000
+
+/**
+ * @brief Time for a PD to inform the user that it is charging.
+ *        This is the time a PD waits to inform the user that it is charging after attach.
+ */
+#define BC12_T_DBP_INFORM_MAX_MS 60 * 1000
+
+/**
+ * @brief Time for VDP_SRC to be disabled before connect during Dead Battery Provision (DBP).
+ *        This is the time a PD waits to disable VDP_SRC before connect.
+ */
+#define BC12_T_DBP_VDPSRC_CON_MAX_MS 1000
+
+/**
+ * @brief Debounce time for Data Contact Detect (DCD).
+ *        This is the time the PD waits to confirm data pin contact.
+ */
+#define BC12_T_DCD_DBNC_MIN_MS 10
+
+/**
+ * @brief Maximum time for Data Contact Detect (DCD) timeout.
+ *        This is the time the PD waits for data pin contact detection.
+ */
+#define BC12_T_DCD_TIMEOUT_MAX_MS 900
+
+/**
+ * @brief Minimum time for Data Contact Detect (DCD) timeout.
+ *        This is the time the PD waits for data pin contact detection.
+ */
+#define BC12_T_DCD_TIMEOUT_MIN_MS 300
+
+/**
+ * @brief Minimum time between load steps for a Dedicated Charging Port (DCP).
+ *        This is the time a DCP waits between load steps to ensure stable operation.
+ */
+#define BC12_T_DCP_LD_STP_MIN_MS 20
+
+/**
+ * @brief Maximum undershoot time for a Dedicated Charging Port (DCP).
+ *        This is the maximum time a DCP allows for undershoot during load transitions.
+ */
+#define BC12_T_DCP_UNDSHT_MAX_MS 10
+
+/**
+ * @brief Maximum recovery time after shutdown for a Charging Port.
+ *        This is the time a Charging Port takes to recover after a shutdown event.
+ */
+#define BC12_T_SHTDWN_REC_MAX_MS 2 * 60 * 1000
+
+/**
+ * @brief Time for a PD to connect after VBUS is detected.
+ *        This is the time a PD waits to connect after VBUS is detected.
+ */
+#define BC12_T_SVLD_CON_PWD_MAX_MS 1000
+
+/**
+ * @brief Time for a PD with Dead or Weak Battery to connect after VBUS is detected.
+ *        This is the time a PD with Dead or Weak Battery waits to connect after VBUS is detected.
+ */
+#define BC12_T_SVLD_CON_WKB_MS 45 * 60 * 1000
+
+/**
+ * @brief Maximum time for VBUS voltage averaging.
+ *        This is the time over which the VBUS voltage is averaged to ensure stable readings.
+ */
+#define BC12_T_VBUS_AVG_MAX_MS 250
+
+/**
+ * @brief Time for VBUS to be reapplied after detection renegotiation.
+ *        This is the time a downstream port waits to reapply VBUS after detection renegotiation.
+ */
+#define BC12_T_VBUS_REAPP_MIN_MS 100
+
+/**
+ * @brief Maximum time for VDM_SRC to be disabled.
+ *        This is the time a Charging Port takes to disable VDM_SRC after a connect event.
+ */
+#define BC12_T_VDMSRC_DIS_MAX_MS 20
+
+/**
+ * @brief Maximum time for VDM_SRC to be enabled.
+ *        This is the time a Charging Port takes to enable VDM_SRC after a disconnect event.
+ */
+#define BC12_T_VDMSRC_EN_MAX_MS 20
+
+/**
+ * @brief Minimum time for VDP_SRC to be on during Primary Detection.
+ *        This is the time a PD keeps VDP_SRC on during Primary Detection.
+ */
+#define BC12_T_VDPSRC_ON_MIN_MS 40
+
+/**
+ * @brief Minimum time for VDM_SRC to be on during Secondary Detection.
+ *        This is the time a PD keeps VDM_SRC on during Secondary Detection.
+ */
+#define BC12_T_VDMSRC_ON_MIN_MS 40
+
+/**
+ * @brief Time for VBUS to decay to VBUS_LKG after removal.
+ *        This is the time VBUS takes to decay to VBUS_LKG after removal.
+ */
+#define BC12_T_VLD_VLKG_MAX_MS 500
+
+/** @} */
+
+/**
  * @name BC1.2 constants
  * @{
  */
