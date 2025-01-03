@@ -1,0 +1,34 @@
+# Copyright (c) 2025 Jianxiong Gu
+# SPDX-License-Identifier: Apache-2.0
+
+menuconfig USB_CHARGE_PROTOCOL_BC12
+	bool "USB BC1.2 Support"
+	select SMF
+	help
+	  Enable the USB BC1.2. Note that each USB port gets its own thread.
+
+if USB_CHARGE_PROTOCOL_BC12
+
+config USB_BC12_STATE_MACHINE_CYCLE_TIME
+	int "BC1.2 state machine cycle time in milliseconds"
+	default 5
+	help
+	  The BC1.2 state machine is run in a loop and the cycle time is the
+	  delay before running the loop again.
+
+choice USB_BC12_ROLE
+	prompt "USB BC1.2 State Machine"
+	default USB_BC12_PD_ONLY
+
+config USB_BC12_PD_ONLY
+	bool "USB BC1.2 Portable Device State Machine"
+	help
+	  Allows the USB BC1.2 state machine to function as a Portable Device.
+
+endchoice
+
+module = USB_BC12
+module-str = usb bc12
+source "subsys/logging/Kconfig.template.log_config"
+
+endif # USB_CHARGE_PROTOCOL_BC12
