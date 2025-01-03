@@ -41,7 +41,8 @@ the Zephyr implementation when using portable-device mode.
 Basic Operation
 ***************
 
-The BC1.2 device driver provides only two APIs, ``bc12_set_role()`` and
+The BC1.2 device driver provides four APIs. For devices with autonomous
+detection, application software can only use ``bc12_set_role()`` and
 ``bc12_set_result_cb()``.
 
 The application calls ``bc12_set_role()`` to transition the BC1.2 device to
@@ -77,6 +78,10 @@ specified by a devicetree property. If the driver supports detection of plug and
 unplug events, the BC1.2 driver notifies the callback registered with
 ``bc12_set_result_cb()`` to indicate the current connection state of the
 portable device partner.
+
+For devices without autonomous detection, the driver provides ``bc12_set_dpdm()``
+and ``bc12_get_dpdm()`` APIs. Zephyr implements logic for controlling and
+sensing the DP/DM pins.
 
 Configuration Options
 *********************
