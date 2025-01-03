@@ -134,6 +134,11 @@ static int tc_init(const struct device *dev)
 #ifdef CONFIG_USBC_CSM_SOURCE_ONLY
 	usbc_timer_init(&tc->tc_t_vconn_off, TC_T_VCONN_OFF_MAX_MS);
 #endif
+#ifndef CONFIG_USBC_CSM_SOURCE_ONLY
+#ifdef CONFIG_USBC_BC12
+	usbc_timer_init(&tc->tc_t_bc12_cmpletion, data.snk_bc12_cmpletion_time);
+#endif
+#endif
 
 	/* Clear the flags */
 	tc->flags = ATOMIC_INIT(0);

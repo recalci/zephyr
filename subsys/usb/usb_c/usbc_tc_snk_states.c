@@ -240,8 +240,31 @@ void tc_attached_snk_run(void *obj)
 
 	/* Detach detection */
 	if (usbc_vbus_check_level(vbus, TC_VBUS_PRESENT) == false) {
+#ifdef CONFIG_USBC_BC12
+		usbc_timer_stop(&tc->tc_t_bc12_cmpletion);
+#endif
 		tc_set_state(dev, TC_UNATTACHED_SNK_STATE);
 		return;
+#ifdef CONFIG_USBC_BC12
+	} else {
+		/*
+		 * For Type C port controllers that use Battery Charging
+		 * Detection (based on BCv1.2 spec) to detect USB
+		 * charger type, add a delay of "tc_t_bc12_cmpletion"
+		 * to allow BC1.2 detection to complete before PD is
+		 * eventually enabled in later states.
+		 */
+		if (usbc_timer_running(&tc->tc_t_bc12_cmpletion) == false) {
+			usbc_timer_start(&tc->tc_t_bc12_cmpletion);
+		}
+
+		if (usbc_timer_expired(&tc->tc_t_bc12_cmpletion) == false) {
+			usbc_bypass_next_sleep(tc->dev);
+			return;
+		} else {
+			usbc_timer_stop(&tc->tc_t_bc12_cmpletion);
+		}
+#endif
 	}
 
 	/* Run Sink Power Sub-State if not in an explicit contract */

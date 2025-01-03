@@ -82,6 +82,7 @@ static ALWAYS_INLINE void usbc_handler(void *port_dev)
 		.vbus = DEVICE_DT_GET(DT_INST_PROP(inst, vbus)),                                   \
 		.ppc = COND_CODE_1(DT_INST_NODE_HAS_PROP(inst, ppc),                               \
 				   (DEVICE_DT_GET(DT_INST_PROP(inst, ppc))), (NULL)),              \
+		.snk_bc12_cmpletion_time = DT_INST_PROP(inst, sink_bc12_completion_time_ms),       \
 	};                                                                                         \
                                                                                                    \
 	static const struct usbc_port_config usbc_port_config_##inst = {                           \

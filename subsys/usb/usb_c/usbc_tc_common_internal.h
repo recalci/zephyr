@@ -95,6 +95,12 @@ struct tc_sm_t {
 	/** tVconnOff timer */
 	struct usbc_timer_t tc_t_vconn_off;
 #endif
+#ifndef CONFIG_USBC_CSM_SOURCE_ONLY
+#ifdef CONFIG_USBC_BC12
+	/** BC1.2 timer */
+	struct usbc_timer_t tc_t_bc12_cmpletion;
+#endif
+#endif
 };
 
 /**
