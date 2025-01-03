@@ -1,0 +1,5 @@
+.. zephyr:code-sample-category:: bc12
+   :name: BC1.2
+   :show-listing:
+
+   Samples that demonstrate the :ref:`usb_bc12_api`.
