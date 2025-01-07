@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2022 Google LLC
+ * Copyright (c) 2025 Jianxiong Gu
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -317,6 +318,8 @@ struct bc12_partner_state {
 typedef void (*bc12_callback_t)(const struct device *dev, struct bc12_partner_state *state,
 				void *user_data);
 
+typedef void (*bc12_dpdm_change_callback_t)(const struct device *dev, void *user_data);
+
 /**
  * @cond INTERNAL_HIDDEN
  *
@@ -325,6 +328,11 @@ typedef void (*bc12_callback_t)(const struct device *dev, struct bc12_partner_st
 __subsystem struct bc12_driver_api {
 	int (*set_role)(const struct device *dev, enum bc12_role role);
 	int (*set_result_cb)(const struct device *dev, bc12_callback_t cb, void *user_data);
+	int (*set_dpdm)(const struct device *dev, enum bc12_dp_state dp, enum bc12_dm_state dm);
+	int (*set_dpdm_change_cb)(const struct device *dev, bc12_dpdm_change_callback_t cb,
+				  void *user_data);
+	int (*get_dpdm)(const struct device *dev, enum bc12_dpdm_voltage_level *dp,
+			enum bc12_dpdm_voltage_level *dm);
 };
 /**
  * @endcond
@@ -367,6 +375,63 @@ static inline int z_impl_bc12_set_result_cb(const struct device *dev, bc12_callb
 
 	return api->set_result_cb(dev, cb, user_data);
 }
+
+/**
+ * @brief Set the BC1.2 D+D- state.
+ *
+ * @param dev Pointer to the device structure for the BC1.2 driver instance.
+ * @param dp  The D+ state to set.
+ * @param dm  The D- state to set.
+ *
+ * @retval 0 If successful.
+ * @retval -EINVAL on failure.
+ */
+__syscall int bc12_set_dpdm(const struct device *dev, enum bc12_dp_state dp, enum bc12_dm_state dm);
+
+static inline int z_impl_bc12_set_dpdm(const struct device *dev, enum bc12_dp_state dp,
+				       enum bc12_dm_state dm)
+{
+	const struct bc12_driver_api *api = (const struct bc12_driver_api *)dev->api;
+
+	return api->set_dpdm(dev, dp, dm);
+}
+
+/**
+ * @brief Sets the alert function that's called when an interrupt is triggered
+ *	  due to an alert bit
+ *
+ * Calling this function enables the particular alert bit
+ *
+ * @param dev      Runtime device structure
+ * @param handler  The callback function called when the bit is set
+ * @param data     user data passed to the callback
+ *
+ * @retval 0 on success
+ * @retval -EINVAL on failure
+ */
+
+/**
+ * @brief Register a callback for BC1.2 results.
+ *
+ * @param dev Pointer to the device structure for the BC1.2 driver instance.
+ * @param cb Function pointer for the result callback.
+ * @param user_data Requester supplied data which is passed along to the callback.
+ *
+ * @retval 0 If successful.
+ * @retval -EIO general input/output error.
+ */
+__syscall int bc12_set_dpdm_change_cb(const struct device *dev, bc12_dpdm_change_callback_t cb,
+				      void *user_data);
+
+static inline int z_impl_bc12_set_dpdm_change_cb(const struct device *dev,
+						 bc12_dpdm_change_callback_t cb, void *user_data)
+{
+	const struct bc12_driver_api *api = (const struct bc12_driver_api *)dev->api;
+
+	return api->set_dpdm_change_cb(dev, cb, user_data);
+}
+
+
 
 #ifdef __cplusplus
 }
