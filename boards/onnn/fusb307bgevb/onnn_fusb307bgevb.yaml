@@ -1,0 +1,17 @@
+identifier: onnn_fusb307bgevb
+name: FUSB307B EVAL BOARD
+type: mcu
+arch: arm
+ram: 16
+flash: 128
+toolchain:
+  - zephyr
+  - gnuarmemb
+  - xtools
+supported:
+  - gpio
+  - i2c
+  - uart
+  - pinctrl
+  - tcpc
+vendor: onnn

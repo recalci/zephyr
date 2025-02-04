@@ -1,0 +1,24 @@
+# SPDX-License-Identifier: Apache-2.0
+
+# Serial Drivers
+CONFIG_SERIAL=y
+CONFIG_UART_INTERRUPT_DRIVEN=y
+
+# Enable Console
+CONFIG_CONSOLE=y
+CONFIG_UART_CONSOLE=y
+
+# Enable Clocks
+CONFIG_CLOCK_CONTROL=y
+
+# Enable Logger
+CONFIG_LOG=y
+
+# Enable Pin Controller
+CONFIG_PINCTRL=y
+
+# Enable GPIO
+CONFIG_GPIO=y
+
+# Enable FUSB307 GPIO
+# CONFIG_GPIO_FUSB307=y

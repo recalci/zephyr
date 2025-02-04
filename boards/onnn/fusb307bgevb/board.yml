@@ -1,0 +1,5 @@
+board:
+  name: onnn_fusb307bgevb
+  vendor: onnn
+  socs:
+    - name: stm32f072xb

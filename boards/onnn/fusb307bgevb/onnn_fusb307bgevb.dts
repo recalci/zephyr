@@ -1,0 +1,112 @@
+/*
+ * Copyright (c) 2024 Jianxiong Gu <jianxiong.gu@outlook.com>
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/dts-v1/;
+#include <st/f0/stm32f072Xb.dtsi>
+#include <st/f0/stm32f072r(8-b)tx-pinctrl.dtsi>
+#include <zephyr/dt-bindings/usb-c/pd.h>
+#include <zephyr/dt-bindings/input/input-event-codes.h>
+
+/ {
+	model = "ON Semiconductor FUSB307B EVAL BOARD";
+	compatible = "onnn,onnn_fusb307bgevb";
+
+	chosen {
+		zephyr,console = &usart2;
+		zephyr,shell-uart = &usart2;
+		zephyr,sram = &sram0;
+		zephyr,flash = &flash0;
+	};
+
+	aliases {
+		//led0 = &gpio2_led;
+		led0 = &src_hv_on_led;
+		watchdog0 = &iwdg;
+		usbc-port0 = &usbc0;
+	};
+
+	leds {
+		compatible = "gpio-leds";
+
+		src_hv_on_led: led_5 {
+			gpios = <&gpiob 12 GPIO_ACTIVE_HIGH>;
+			label = "SRC_HV_ON D5";
+		};
+		/*
+		gpio2_led: led_1 {
+			gpios = <&fusb307_gpio_0 2 GPIO_ACTIVE_LOW>;
+			label = "GPIO2 D1";
+
+		};
+		*/
+	};
+
+	ports {
+		#address-cells = <1>;
+		#size-cells = <0>;
+
+		usbc0: usbc-port@0 {
+			compatible = "usb-c-connector";
+			status = "okay";
+			tcpc = <&fusb307_tcpc0>;
+			vbus = <&fusb307_vbus0>;
+			reg = <1>;
+			power-role = "sink";
+			sink-pdos = <PDO_FIXED(5000, 100, 0)>;
+			source-pdos = <PDO_FIXED(5000, 100, 0)>;
+			typec-power-opmode = "3.0A";
+		};
+	};
+};
+
+&i2c2 {
+	pinctrl-0 = <&i2c2_scl_pb10 &i2c2_sda_pb11>;
+	pinctrl-names = "default";
+	status = "okay";
+	clock-frequency = <I2C_BITRATE_FAST>;
+
+	fusb307_tcpc0: fusb307_tcpc0@50 {
+		compatible = "onnn,fusb307-tcpc";
+		reg = <0x50>;
+		irq-gpios = <&gpioa 8 GPIO_ACTIVE_LOW>;
+		status = "okay";
+
+		fusb307_vbus0: fusb307_vbus0 {
+		compatible = "zephyr,usb-c-vbus-tcpci";
+		status = "okay";
+		};
+	};
+};
+
+&clk_hsi {
+	status = "okay";
+};
+
+&pll {
+	prediv = <1>;
+	mul = <6>;
+	clocks = <&clk_hsi>;
+	status = "okay";
+};
+
+&rcc {
+	clocks = <&pll>;
+	clock-frequency = <DT_FREQ_M(48)>;
+	ahb-prescaler = <1>;
+	apb1-prescaler = <1>;
+};
+
+&usart2 {
+	pinctrl-0 = <&usart2_tx_pa2 &usart2_rx_pa3>;
+	pinctrl-names = "default";
+	current-speed = <115200>;
+	//current-speed = <921600>;
+	status = "okay";
+};
+
+&iwdg {
+	status = "okay";
+};
