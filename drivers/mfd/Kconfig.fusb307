@@ -1,0 +1,17 @@
+# Copyright (c) 2025 Jianxiong Gu <jianxiong.gu@outlook.com>
+# SPDX-License-Identifier: Apache-2.0
+
+menuconfig MFD_FUSB307
+	bool "ON Semiconductor FUSB307 TCPC/GPIO chip"
+	default y
+	depends on DT_HAS_ONNN_FUSB307_ENABLED
+	select I2C
+	help
+	  Enable support for the ON Semiconductor FUSB307 driver.
+
+config MFD_FUSB307_INIT_PRIORITY
+	int "Init priority"
+	default 70
+	depends on MFD_FUSB307
+	help
+	  Device driver initialization priority. The priority should be lower than I2C.

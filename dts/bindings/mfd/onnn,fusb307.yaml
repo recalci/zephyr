@@ -1,0 +1,15 @@
+# Copyright (c) 2025 Jianxiong Gu <jianxiong.gu@outlook.com>
+# SPDX-License-Identifier: Apache-2.0
+
+description: |
+    Onsemi FUSB307 TCPC chip, also provides VBUS measurement and 2 GPIOs.
+
+compatible: "onnn,fusb307"
+
+include: i2c-device.yaml
+
+properties:
+  irq-gpios:
+    type: phandle-array
+    required: true
+    description: Interrupt GPIO pin connected from the chip
