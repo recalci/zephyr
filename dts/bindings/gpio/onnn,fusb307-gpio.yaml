@@ -1,0 +1,31 @@
+# Copyright (c) 2025 Jianxiong Gu <jianxiong.gu@outlook.com>
+# SPDX-License-Identifier: Apache-2.0
+
+description: |
+    Onsemi FUSB307 TCPC chip GPIO port
+
+include: [gpio-controller.yaml, base.yaml]
+
+compatible: "onnn,fusb307-gpio"
+
+properties:
+  "#gpio-cells":
+    const: 2
+
+  ngpios:
+    type: int
+    required: true
+    const: 3
+    description: |
+      Number of GPIOs available on port expander.
+
+  gpio-reserved-ranges:
+    required: true
+    const: [0, 1]
+    description: |
+      Ranges of GPIOs reserved unavailable on port expander.
+      The FUSB307 has 2 GPIO. GPIO number0 is reserved.
+
+gpio-cells:
+  - pin
+  - flags

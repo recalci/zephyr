@@ -1,0 +1,18 @@
+# Copyright (c) 2025 Jianxiong Gu <jianxiong.gu@outlook.com>
+# SPDX-License-Identifier: Apache-2.0
+
+menuconfig GPIO_FUSB307
+	bool "ON Semiconductor FUSB307 GPIO support"
+	default y
+	depends on DT_HAS_ONNN_FUSB307_GPIO_ENABLED
+	select MFD
+	help
+	  Enable GPIO driver for the FUSB307.
+
+config GPIO_FUSB307_INIT_PRIORITY
+	int "FUSB307 GPIO init priority"
+	default 71
+	depends on GPIO_FUSB307
+	help
+	  Initialization priority for the FUSB307 GPIO driver. This priority
+	  should be lower than MFD_FUSB307_INIT_PRIORITY.

@@ -79,6 +79,13 @@ struct mfd_fusb307_data {
 	struct k_work alert_worker;
 	/* Alert pin callback */
 	struct gpio_callback gpio_cb;
+	struct {
+#ifdef CONFIG_GPIO_FUSB307
+		const struct device *gpio_dev;
+#endif /* CONFIG_GPIO_FUSB307 */
+	} child;
 };
+
+int fusb307_gpio_alert_handler(const struct device *dev);
 
 #endif /* ZEPHYR_INCLUDE_DRIVERS_MFD_FUSB307_H_ */

@@ -38,7 +38,21 @@ static void fusb307_alert_worker(struct k_work *work)
 		LOG_DBG("alert: 0x%04x", alert_reg);
 
 #ifdef CONFIG_GPIO_FUSB307
-		/* TBD */
+		if (alert_reg & TCPC_REG_ALERT_VENDOR_DEF) {
+			if (!device_is_ready(data->child.gpio_dev)) {
+				LOG_ERR("%s device not ready", data->child.gpio_dev->name);
+				ret = -ENODEV;
+				goto out;
+			}
+
+			ret = fusb307_gpio_alert_handler(data->child.gpio_dev);
+			if (ret) {
+				LOG_ERR("failed to handle GPIO alert");
+				goto out;
+			}
+
+			processed_alert |= TCPC_REG_ALERT_VENDOR_DEF;
+		}
 #endif /* CONFIG_GPIO_FUSB307 */
 
 #ifdef CONFIG_USBC_TCPC_FUSB307
