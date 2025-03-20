@@ -4,8 +4,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include <wch/ch32v208/ch32v208.dtsi>
+#include <wch/ch32v2/ch32v208.dtsi>
+#include <wch/ch32v2/ch32v20XXb.dtsi>
 
 &gpiod {
-	gpio-reserved-ranges = <0 2>, <7 8>;
+	gpio-reserved-ranges = <0 2>, <3 12>;
 };
