@@ -1,0 +1,6 @@
+board:
+  name: bluepill_ch32v203
+  full_name: WeAct Studio Blue Pill Plus V1.1 (CH32V203)
+  vendor: weact
+  socs:
+    - name: ch32v203
